@@ -92,18 +92,15 @@ export async function POST(request: NextRequest) {
             const imagePrompt = `Create an image for a ${platform} social media post about: ${topic}. Style: ${styleDescription}. The image should be visually appealing, relevant to the topic, and suitable for social media.`;
 
             const imageResponse = await fetch(
-              "https://openrouter.ai/api/v1/images/generations",
+              "https://api.openai.com/v1/images/generations",
               {
                 method: "POST",
                 headers: {
                   "Content-Type": "application/json",
-                  Authorization: `Bearer ${process.env.OPENROUTER_API_KEY}`,
-                  "HTTP-Referer":
-                    "https://capital-compass-post-generator.vercel.app",
-                  "X-Title": "Capital Compass Post Generator",
+                  Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
                 },
                 body: JSON.stringify({
-                  model: "openai/dall-e-3",
+                  model: "dall-e-3",
                   prompt: imagePrompt,
                   size: platform === "instagram" ? "1024x1024" : "1024x768",
                   quality: "standard",
