@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { PostGenerator } from "@/components/post-generator";
 import { PostablesCollection } from "@/components/postables-collection";
+import { ImagesCollection } from "@/components/images-collection";
 import { Button } from "@/components/ui/button";
 import { LogOut } from "lucide-react";
 
@@ -70,8 +71,9 @@ export default function DashboardPage() {
           <div className="lg:col-span-2">
             <PostGenerator />
           </div>
-          <div className="lg:col-span-1">
+          <div className="lg:col-span-1 space-y-8">
             <PostablesCollection />
+            <ImagesCollection />
           </div>
         </div>
       </div>

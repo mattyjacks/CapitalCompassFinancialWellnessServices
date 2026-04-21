@@ -128,6 +128,22 @@ export function PostGenerator() {
       });
       localStorage.setItem("postables", JSON.stringify(existingPostables));
 
+      if (generateImage) {
+        const existingImages = JSON.parse(
+          localStorage.getItem("generatedImages") || "[]"
+        );
+        newPosts.forEach((post) => {
+          if (post.imageUrl) {
+            existingImages.push({
+              url: post.imageUrl,
+              platform: post.platform,
+              timestamp: post.timestamp,
+            });
+          }
+        });
+        localStorage.setItem("generatedImages", JSON.stringify(existingImages));
+      }
+
       setChatMessages([
         {
           role: "assistant",
