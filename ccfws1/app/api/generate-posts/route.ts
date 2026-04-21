@@ -116,11 +116,18 @@ export async function POST(request: NextRequest) {
               const imageData = await imageResponse.json();
               if (imageData.data?.[0]?.url) {
                 results[platform].imageUrl = imageData.data[0].url;
+              } else {
+                console.warn(
+                  `No image URL in response for ${platform}:`,
+                  imageData
+                );
               }
             } else {
+              const errorText = await imageResponse.text();
               console.warn(
                 `Failed to generate image for ${platform}:`,
-                imageResponse.status
+                imageResponse.status,
+                errorText
               );
             }
           } catch (imageError) {

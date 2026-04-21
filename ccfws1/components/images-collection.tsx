@@ -151,35 +151,37 @@ export function ImagesCollection() {
             return (
               <div
                 key={actualIndex}
-                className="relative group rounded-lg overflow-hidden bg-gray-200 dark:bg-slate-700 aspect-square"
+                className="group rounded-lg overflow-hidden bg-gray-200 dark:bg-slate-700 aspect-square flex flex-col"
               >
-                <img
-                  src={image.url}
-                  alt={`${image.platform} image`}
-                  className="w-full h-full object-cover"
-                  onError={(e) => {
-                    (e.target as HTMLImageElement).src =
-                      "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100'%3E%3Crect fill='%23ccc' width='100' height='100'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='Arial' font-size='12' fill='%23999'%3EImage Error%3C/text%3E%3C/svg%3E";
-                  }}
-                />
-                <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-50 transition-all flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100">
-                  <Button
-                    size="sm"
-                    onClick={() => downloadImage(image.url, image.platform)}
-                    className="bg-white text-gray-900 hover:bg-gray-100"
-                  >
-                    <Download className="w-4 h-4" />
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    onClick={() => deleteImage(actualIndex)}
-                    className="bg-red-600 hover:bg-red-700 text-white"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </Button>
+                <div className="relative flex-1 overflow-hidden">
+                  <img
+                    src={image.url}
+                    alt={`${image.platform} image`}
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).src =
+                        "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100'%3E%3Crect fill='%23ccc' width='100' height='100'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='Arial' font-size='12' fill='%23999'%3EImage Error%3C/text%3E%3C/svg%3E";
+                    }}
+                  />
+                  <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-50 transition-all flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100">
+                    <Button
+                      size="sm"
+                      onClick={() => downloadImage(image.url, image.platform)}
+                      className="bg-white text-gray-900 hover:bg-gray-100"
+                    >
+                      <Download className="w-4 h-4" />
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => deleteImage(actualIndex)}
+                      className="bg-red-600 hover:bg-red-700 text-white"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
+                  </div>
                 </div>
-                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black to-transparent p-2">
+                <div className="bg-gradient-to-t from-black to-transparent p-2">
                   <p className="text-xs text-white font-medium capitalize">
                     {image.platform}
                   </p>
