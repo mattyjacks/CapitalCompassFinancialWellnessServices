@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { ChatBot } from "@/components/chatbot";
-import { Loader2, Copy, Check, Save } from "lucide-react";
+import { Loader2, Copy, Check, Save, Image as ImageIcon } from "lucide-react";
 
 type Platform = "linkedin" | "facebook" | "instagram" | "tiktok";
 
@@ -15,6 +15,19 @@ interface GeneratedPost {
   imageUrl?: string;
   timestamp: number;
 }
+
+const IMAGE_STYLES = {
+  professional: "Professional",
+  vibrant: "Vibrant",
+  minimalist: "Minimalist",
+  abstract: "Abstract",
+  illustration: "Illustration",
+  photography: "Photography",
+  gradient: "Gradient",
+  retro: "Retro",
+  neon: "Neon",
+  flat: "Flat Design",
+};
 
 export function PostGenerator() {
   const [topic, setTopic] = useState("");
@@ -28,6 +41,10 @@ export function PostGenerator() {
     Array<{ role: "user" | "assistant"; content: string }>
   >([]);
   const [showChat, setShowChat] = useState(false);
+  const [generateImage, setGenerateImage] = useState(false);
+  const [imageStyle, setImageStyle] = useState<keyof typeof IMAGE_STYLES>(
+    "professional"
+  );
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const platforms: { id: Platform; label: string; color: string }[] = [
@@ -72,6 +89,8 @@ export function PostGenerator() {
         body: JSON.stringify({
           topic,
           platforms: selectedPlatforms,
+          generateImage,
+          imageStyle,
         }),
       });
 
@@ -191,6 +210,50 @@ export function PostGenerator() {
                 </button>
               ))}
             </div>
+          </div>
+
+          <div className="border-t border-gray-200 dark:border-slate-700 pt-4">
+            <div className="flex items-center gap-3 mb-3">
+              <input
+                type="checkbox"
+                id="generateImage"
+                checked={generateImage}
+                onChange={(e) => setGenerateImage(e.target.checked)}
+                className="w-4 h-4 rounded cursor-pointer"
+              />
+              <Label
+                htmlFor="generateImage"
+                className="text-gray-700 dark:text-gray-300 cursor-pointer flex items-center gap-2"
+              >
+                <ImageIcon className="w-4 h-4" />
+                Generate Images with Posts
+              </Label>
+            </div>
+
+            {generateImage && (
+              <div>
+                <Label
+                  htmlFor="imageStyle"
+                  className="text-gray-700 dark:text-gray-300 block mb-2"
+                >
+                  Image Style
+                </Label>
+                <select
+                  id="imageStyle"
+                  value={imageStyle}
+                  onChange={(e) =>
+                    setImageStyle(e.target.value as keyof typeof IMAGE_STYLES)
+                  }
+                  className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-white"
+                >
+                  {Object.entries(IMAGE_STYLES).map(([key, label]) => (
+                    <option key={key} value={key}>
+                      {label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
           </div>
 
           <Button
