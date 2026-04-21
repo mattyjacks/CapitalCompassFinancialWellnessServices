@@ -84,12 +84,20 @@ export async function POST(request: NextRequest) {
       if (content?.type === "text") {
         results[platform] = { text: content.text };
 
-        if (generateImage) {
+        if (generateImage && process.env.OPENAI_API_KEY) {
           try {
             const styleDescription =
               IMAGE_STYLES[imageStyle as keyof typeof IMAGE_STYLES] ||
               IMAGE_STYLES.professional;
-            const imagePrompt = `Create an image for a ${platform} social media post about: ${topic}. Style: ${styleDescription}. The image should be visually appealing, relevant to the topic, and suitable for social media.`;
+            const imagePrompt = `Create an image for a ${platform} social media post about: ${topic}. Style: ${styleDescription}. The image should be visually appealing, relevant to the topic, and suitable for social media. No text in the image.`;
+
+            // DALL-E 3 only supports: 1024x1024, 1024x1792, 1792x1024
+            const size =
+              platform === "instagram"
+                ? "1024x1024"
+                : platform === "tiktok"
+                  ? "1024x1792"
+                  : "1792x1024";
 
             const imageResponse = await fetch(
               "https://api.openai.com/v1/images/generations",
@@ -102,7 +110,7 @@ export async function POST(request: NextRequest) {
                 body: JSON.stringify({
                   model: "dall-e-3",
                   prompt: imagePrompt,
-                  size: platform === "instagram" ? "1024x1024" : "1024x768",
+                  size: size,
                   quality: "standard",
                   n: 1,
                 }),
@@ -111,12 +119,13 @@ export async function POST(request: NextRequest) {
 
             if (imageResponse.ok) {
               const imageData = await imageResponse.json();
+              console.log(`Image response for ${platform}:`, JSON.stringify(imageData).substring(0, 200));
               if (imageData.data?.[0]?.url) {
                 results[platform].imageUrl = imageData.data[0].url;
               } else {
                 console.warn(
                   `No image URL in response for ${platform}:`,
-                  imageData
+                  JSON.stringify(imageData)
                 );
               }
             } else {
