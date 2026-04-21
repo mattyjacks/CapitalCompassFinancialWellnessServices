@@ -56,7 +56,7 @@ export async function POST(request: NextRequest) {
           "X-Title": "Capital Compass Post Generator",
         },
         body: JSON.stringify({
-          model: "anthropic/claude-3.5-sonnet",
+          model: "anthropic/claude-4.5-haiku",
           messages: [
             {
               role: "user",
