@@ -1,10 +1,4 @@
 import { NextRequest, NextResponse } from "next/server";
-import Anthropic from "@anthropic-ai/sdk";
-
-const anthropic = new Anthropic({
-  apiKey: process.env.OPENROUTER_API_KEY,
-  baseURL: "https://openrouter.ai/api/v1",
-});
 
 export async function POST(request: NextRequest) {
   try {
@@ -40,19 +34,41 @@ export async function POST(request: NextRequest) {
     for (const platform of platforms) {
       const prompt = `${platformPrompts[platform]}\n\nTopic: ${topic}`;
 
-      const message = await anthropic.messages.create({
-        model: "claude-3-5-sonnet-20241022",
-        max_tokens: 1024,
-        messages: [
-          {
-            role: "user",
-            content: prompt,
-          },
-        ],
+      const response = await fetch("https://openrouter.ai/api/v1/messages", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${process.env.OPENROUTER_API_KEY}`,
+          "HTTP-Referer": "https://capital-compass-post-generator.vercel.app",
+          "X-Title": "Capital Compass Post Generator",
+        },
+        body: JSON.stringify({
+          model: "anthropic/claude-3.5-sonnet",
+          messages: [
+            {
+              role: "user",
+              content: prompt,
+            },
+          ],
+          max_tokens: 1024,
+        }),
       });
 
-      const content = message.content[0];
-      if (content.type === "text") {
+      if (!response.ok) {
+        const errorData = await response.text();
+        console.error(
+          `OpenRouter error for ${platform}:`,
+          response.status,
+          errorData
+        );
+        throw new Error(
+          `Failed to generate ${platform} post: ${response.statusText}`
+        );
+      }
+
+      const data = await response.json();
+      const content = data.content?.[0];
+      if (content?.type === "text") {
         results[platform] = content.text;
       }
     }
