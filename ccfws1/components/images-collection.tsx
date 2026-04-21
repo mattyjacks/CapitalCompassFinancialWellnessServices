@@ -51,19 +51,27 @@ export function ImagesCollection() {
 
   const downloadImage = async (url: string, platform: string) => {
     try {
-      const response = await fetch(url);
+      const response = await fetch(url, {
+        mode: "cors",
+        credentials: "omit",
+      });
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
       const blob = await response.blob();
       const downloadUrl = window.URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = downloadUrl;
-      a.download = `${platform}-${Date.now()}.png`;
-      document.body.appendChild(a);
-      a.click();
+      const link = document.createElement("a");
+      link.href = downloadUrl;
+      link.download = `${platform}-${Date.now()}.png`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
       window.URL.revokeObjectURL(downloadUrl);
-      document.body.removeChild(a);
     } catch (error) {
       console.error("Download failed:", error);
-      alert("Failed to download image");
+      alert("Failed to download image. The image URL may have expired. Try regenerating the post.");
     }
   };
 
