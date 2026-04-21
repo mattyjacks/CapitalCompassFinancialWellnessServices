@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
-import OpenAI from "openai";
+import Anthropic from "@anthropic-ai/sdk";
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
+const anthropic = new Anthropic({
+  apiKey: process.env.OPENROUTER_API_KEY,
+  baseURL: "https://openrouter.ai/api/v1",
 });
 
 interface GeneratedPost {
@@ -27,9 +28,9 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (!process.env.OPENAI_API_KEY) {
+    if (!process.env.OPENROUTER_API_KEY) {
       return NextResponse.json(
-        { error: "OpenAI API key not configured" },
+        { error: "OpenRouter API key not configured" },
         { status: 500 }
       );
     }
@@ -54,7 +55,7 @@ ${posts
 
 Be helpful, concise, and focused on improving social media content.`;
 
-    const messages: OpenAI.Messages.MessageParam[] = [
+    const messages: Array<{ role: "user" | "assistant"; content: string }> = [
       ...conversationHistory.map((msg: Message) => ({
         role: msg.role as "user" | "assistant",
         content: msg.content,
@@ -65,11 +66,11 @@ Be helpful, concise, and focused on improving social media content.`;
       },
     ];
 
-    const response = await openai.messages.create({
+    const response = await anthropic.messages.create({
       model: "claude-3-5-sonnet-20241022",
       max_tokens: 1024,
       system: systemPrompt,
-      messages: messages,
+      messages: messages as any,
     });
 
     const content = response.content[0];
