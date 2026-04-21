@@ -16,8 +16,9 @@ An AI-powered internal tool for generating platform-specific social media posts 
   - Facebook (engaging, 100-150 words)
   - Instagram (captivating captions with hashtags)
   - TikTok (trendy, 50-100 characters)
+- **AI Image Generation**: Automatically generates relevant images using DALL-E 3 for each post
 - **Interactive AI Chatbot**: Refine and improve generated posts with natural language requests
-- **Postables Collection**: Save and manage generated posts with local storage persistence
+- **Postables Collection**: Save and manage generated posts with images using local storage
 - **Dark Mode Support**: Full dark/light theme support
 - **Responsive Design**: Works seamlessly on desktop and mobile
 

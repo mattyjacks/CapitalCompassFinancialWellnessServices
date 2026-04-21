@@ -12,6 +12,7 @@ type Platform = "linkedin" | "facebook" | "instagram" | "tiktok";
 interface GeneratedPost {
   platform: Platform;
   content: string;
+  imageUrl?: string;
   timestamp: number;
 }
 
@@ -80,11 +81,15 @@ export function PostGenerator() {
 
       const data = await response.json();
 
-      const newPosts: GeneratedPost[] = selectedPlatforms.map((platform) => ({
-        platform,
-        content: data[platform] || "",
-        timestamp: Date.now(),
-      }));
+      const newPosts: GeneratedPost[] = selectedPlatforms.map((platform) => {
+        const postData = data[platform];
+        return {
+          platform,
+          content: typeof postData === "string" ? postData : postData?.text || "",
+          imageUrl: typeof postData === "object" ? postData?.imageUrl : undefined,
+          timestamp: Date.now(),
+        };
+      });
 
       setGeneratedPosts(newPosts);
 
@@ -95,8 +100,10 @@ export function PostGenerator() {
         if (!existingPostables[platform]) {
           existingPostables[platform] = [];
         }
+        const postData = data[platform];
         existingPostables[platform].push({
-          content: data[platform],
+          content: typeof postData === "string" ? postData : postData?.text || "",
+          imageUrl: typeof postData === "object" ? postData?.imageUrl : undefined,
           timestamp: Date.now(),
         });
       });
@@ -212,45 +219,59 @@ export function PostGenerator() {
             {generatedPosts.map((post, index) => (
               <div
                 key={index}
-                className="border border-gray-200 dark:border-slate-700 rounded-lg p-4 bg-gray-50 dark:bg-slate-700"
+                className="border border-gray-200 dark:border-slate-700 rounded-lg overflow-hidden bg-gray-50 dark:bg-slate-700"
               >
-                <div className="flex items-center justify-between mb-3">
-                  <span className="font-semibold text-gray-900 dark:text-white">
-                    {platforms.find((p) => p.id === post.platform)?.label}
-                  </span>
-                  <div className="flex gap-2">
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => copyToClipboard(post.content, index)}
-                      className="dark:bg-slate-600 dark:border-slate-500"
-                    >
-                      {copiedIndex === index ? (
-                        <>
-                          <Check className="w-4 h-4 mr-1" />
-                          Copied
-                        </>
-                      ) : (
-                        <>
-                          <Copy className="w-4 h-4 mr-1" />
-                          Copy
-                        </>
-                      )}
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => savePost(post)}
-                      className="dark:bg-slate-600 dark:border-slate-500"
-                    >
-                      <Save className="w-4 h-4 mr-1" />
-                      Save
-                    </Button>
+                {post.imageUrl && (
+                  <div className="relative w-full h-64 bg-gray-200 dark:bg-slate-600">
+                    <img
+                      src={post.imageUrl}
+                      alt={`${post.platform} post image`}
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).style.display = "none";
+                      }}
+                    />
                   </div>
+                )}
+                <div className="p-4">
+                  <div className="flex items-center justify-between mb-3">
+                    <span className="font-semibold text-gray-900 dark:text-white">
+                      {platforms.find((p) => p.id === post.platform)?.label}
+                    </span>
+                    <div className="flex gap-2">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => copyToClipboard(post.content, index)}
+                        className="dark:bg-slate-600 dark:border-slate-500"
+                      >
+                        {copiedIndex === index ? (
+                          <>
+                            <Check className="w-4 h-4 mr-1" />
+                            Copied
+                          </>
+                        ) : (
+                          <>
+                            <Copy className="w-4 h-4 mr-1" />
+                            Copy
+                          </>
+                        )}
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => savePost(post)}
+                        className="dark:bg-slate-600 dark:border-slate-500"
+                      >
+                        <Save className="w-4 h-4 mr-1" />
+                        Save
+                      </Button>
+                    </div>
+                  </div>
+                  <p className="text-gray-700 dark:text-gray-300 whitespace-pre-wrap">
+                    {post.content}
+                  </p>
                 </div>
-                <p className="text-gray-700 dark:text-gray-300 whitespace-pre-wrap">
-                  {post.content}
-                </p>
               </div>
             ))}
           </div>

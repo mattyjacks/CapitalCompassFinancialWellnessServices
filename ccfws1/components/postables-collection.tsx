@@ -6,6 +6,7 @@ import { Copy, Check, Trash2 } from "lucide-react";
 
 interface Postable {
   content: string;
+  imageUrl?: string;
   timestamp: number;
 }
 
@@ -113,40 +114,54 @@ export function PostablesCollection() {
             return (
               <div
                 key={id}
-                className="border border-gray-200 dark:border-slate-700 rounded-lg p-3 bg-gray-50 dark:bg-slate-700 group hover:shadow-md transition-shadow"
+                className="border border-gray-200 dark:border-slate-700 rounded-lg overflow-hidden bg-gray-50 dark:bg-slate-700 group hover:shadow-md transition-shadow"
               >
-                <div className="flex items-start justify-between gap-2 mb-2">
-                  <span className="text-xs text-gray-500 dark:text-gray-400">
-                    {new Date(postable.timestamp).toLocaleDateString()}
-                  </span>
-                  <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onClick={() =>
-                        copyToClipboard(postable.content, id)
-                      }
-                      className="h-6 w-6 p-0 dark:hover:bg-slate-600"
-                    >
-                      {copiedId === id ? (
-                        <Check className="w-3 h-3 text-green-600" />
-                      ) : (
-                        <Copy className="w-3 h-3" />
-                      )}
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onClick={() => deletePostable(selectedPlatform, index)}
-                      className="h-6 w-6 p-0 dark:hover:bg-slate-600"
-                    >
-                      <Trash2 className="w-3 h-3 text-red-600" />
-                    </Button>
+                {postable.imageUrl && (
+                  <div className="relative w-full h-32 bg-gray-200 dark:bg-slate-600">
+                    <img
+                      src={postable.imageUrl}
+                      alt="postable"
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).style.display = "none";
+                      }}
+                    />
                   </div>
+                )}
+                <div className="p-3">
+                  <div className="flex items-start justify-between gap-2 mb-2">
+                    <span className="text-xs text-gray-500 dark:text-gray-400">
+                      {new Date(postable.timestamp).toLocaleDateString()}
+                    </span>
+                    <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() =>
+                          copyToClipboard(postable.content, id)
+                        }
+                        className="h-6 w-6 p-0 dark:hover:bg-slate-600"
+                      >
+                        {copiedId === id ? (
+                          <Check className="w-3 h-3 text-green-600" />
+                        ) : (
+                          <Copy className="w-3 h-3" />
+                        )}
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => deletePostable(selectedPlatform, index)}
+                        className="h-6 w-6 p-0 dark:hover:bg-slate-600"
+                      >
+                        <Trash2 className="w-3 h-3 text-red-600" />
+                      </Button>
+                    </div>
+                  </div>
+                  <p className="text-xs text-gray-700 dark:text-gray-300 line-clamp-3">
+                    {postable.content}
+                  </p>
                 </div>
-                <p className="text-xs text-gray-700 dark:text-gray-300 line-clamp-3">
-                  {postable.content}
-                </p>
               </div>
             );
           })

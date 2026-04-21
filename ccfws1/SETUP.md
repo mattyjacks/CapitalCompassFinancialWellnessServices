@@ -7,14 +7,15 @@ This is an internal-use-only web application for Capital Compass Financial and W
 ## Features
 
 - **Password-Protected Access**: Simple password authentication (password: "password")
-- **AI Post Generation**: Uses OpenAI's Claude 3.5 Sonnet to generate platform-specific posts
+- **AI Post Generation**: Uses Claude 3.5 Sonnet to generate platform-specific posts
+- **AI Image Generation**: Automatically generates relevant images using DALL-E 3 for each post
 - **Multi-Platform Support**: Generate optimized posts for:
   - LinkedIn (professional, 150-200 words)
   - Facebook (engaging, 100-150 words)
   - Instagram (captivating captions with hashtags)
   - TikTok (trendy, 50-100 characters)
 - **AI Chatbot Assistant**: Interactive chatbot to refine and improve generated posts
-- **Postables Collection**: Local storage-based collection system to save and manage generated posts
+- **Postables Collection**: Local storage-based collection system to save and manage generated posts with images
 - **Dark Mode Support**: Full dark mode support for comfortable use
 - **Responsive Design**: Works on desktop and mobile devices
 
