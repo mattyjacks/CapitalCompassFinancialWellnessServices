@@ -51,9 +51,10 @@ export function ImagesCollection() {
 
   const downloadImage = async (url: string, platform: string) => {
     try {
-      const response = await fetch(url, {
-        mode: "cors",
-        credentials: "omit",
+      const response = await fetch("/api/download-image", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ imageUrl: url }),
       });
       
       if (!response.ok) {
@@ -71,7 +72,7 @@ export function ImagesCollection() {
       window.URL.revokeObjectURL(downloadUrl);
     } catch (error) {
       console.error("Download failed:", error);
-      alert("Failed to download image. The image URL may have expired. Try regenerating the post.");
+      alert("Failed to download image. Please try again or regenerate the post.");
     }
   };
 
