@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { ChatBot } from "@/components/chatbot";
-import { Loader2, Copy, Check, Save, Image as ImageIcon } from "lucide-react";
+import { Loader2, Copy, Check, Save, Image as ImageIcon, Download } from "lucide-react";
 
 type Platform = "linkedin" | "facebook" | "instagram" | "tiktok";
 
@@ -45,7 +45,19 @@ export function PostGenerator() {
   const [imageStyle, setImageStyle] = useState<keyof typeof IMAGE_STYLES>(
     "professional"
   );
+  const [postLengthMode, setPostLengthMode] = useState<"auto" | "manual">("auto");
+  const [postLength, setPostLength] = useState(150);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  const getOptimalPostLength = (platform: Platform): number => {
+    const lengths: Record<Platform, number> = {
+      linkedin: 200,
+      facebook: 150,
+      instagram: 120,
+      tiktok: 80,
+    };
+    return lengths[platform];
+  };
 
   const platforms: { id: Platform; label: string; color: string }[] = [
     { id: "linkedin", label: "LinkedIn", color: "bg-blue-100 text-blue-800" },
@@ -91,6 +103,8 @@ export function PostGenerator() {
           platforms: selectedPlatforms,
           generateImage,
           imageStyle,
+          postLengthMode,
+          postLength,
         }),
       });
 
@@ -184,6 +198,32 @@ export function PostGenerator() {
     setChatMessages((prev) => [...prev, { role: "user", content: message }]);
   };
 
+  const downloadImage = async (url: string, platform: string) => {
+    try {
+      const response = await fetch(url, {
+        mode: "cors",
+        credentials: "omit",
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const blob = await response.blob();
+      const downloadUrl = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = downloadUrl;
+      link.download = `${platform}-${Date.now()}.png`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(downloadUrl);
+    } catch (error) {
+      console.error("Download failed:", error);
+      alert("Failed to download image. The image URL may have expired. Try regenerating the post.");
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div className="bg-white dark:bg-slate-800 rounded-lg shadow-md p-6">
@@ -229,6 +269,64 @@ export function PostGenerator() {
           </div>
 
           <div className="border-t border-gray-200 dark:border-slate-700 pt-4">
+            <div className="mb-4">
+              <Label className="text-gray-700 dark:text-gray-300 block mb-3">
+                Post Length (characters)
+              </Label>
+              <div className="flex gap-2 mb-3">
+                <button
+                  onClick={() => setPostLengthMode("auto")}
+                  className={`px-4 py-2 rounded-lg font-medium transition-all ${
+                    postLengthMode === "auto"
+                      ? "bg-indigo-600 text-white ring-2 ring-offset-2 ring-indigo-500"
+                      : "bg-gray-200 dark:bg-slate-700 text-gray-700 dark:text-gray-300"
+                  }`}
+                >
+                  Auto
+                </button>
+                <button
+                  onClick={() => setPostLengthMode("manual")}
+                  className={`px-4 py-2 rounded-lg font-medium transition-all ${
+                    postLengthMode === "manual"
+                      ? "bg-indigo-600 text-white ring-2 ring-offset-2 ring-indigo-500"
+                      : "bg-gray-200 dark:bg-slate-700 text-gray-700 dark:text-gray-300"
+                  }`}
+                >
+                  Manual
+                </button>
+              </div>
+              {postLengthMode === "manual" && (
+                <>
+                  <div className="flex gap-3 items-center">
+                    <input
+                      type="range"
+                      min="50"
+                      max="500"
+                      value={postLength}
+                      onChange={(e) => setPostLength(Number(e.target.value))}
+                      className="flex-1 h-2 bg-gray-200 dark:bg-slate-600 rounded-lg appearance-none cursor-pointer"
+                    />
+                    <input
+                      type="number"
+                      min="50"
+                      max="500"
+                      value={postLength}
+                      onChange={(e) => setPostLength(Math.max(50, Math.min(500, Number(e.target.value))))}
+                      className="w-20 px-3 py-2 rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-white text-center"
+                    />
+                  </div>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
+                    Range: 50 - 500 characters
+                  </p>
+                </>
+              )}
+              {postLengthMode === "auto" && (
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
+                  LinkedIn: 200 | Facebook: 150 | Instagram: 120 | TikTok: 80 characters
+                </p>
+              )}
+            </div>
+
             <div className="flex items-center gap-3 mb-3">
               <input
                 type="checkbox"
@@ -301,7 +399,7 @@ export function PostGenerator() {
                 className="border border-gray-200 dark:border-slate-700 rounded-lg overflow-hidden bg-gray-50 dark:bg-slate-700"
               >
                 {post.imageUrl && (
-                  <div className="relative w-full h-64 bg-gray-200 dark:bg-slate-600">
+                  <div className="relative w-full h-64 bg-gray-200 dark:bg-slate-600 group">
                     <img
                       src={post.imageUrl}
                       alt={`${post.platform} post image`}
@@ -310,6 +408,16 @@ export function PostGenerator() {
                         (e.target as HTMLImageElement).style.display = "none";
                       }}
                     />
+                    <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-50 transition-all flex items-center justify-center opacity-0 group-hover:opacity-100">
+                      <Button
+                        size="sm"
+                        onClick={() => downloadImage(post.imageUrl!, post.platform)}
+                        className="bg-white text-gray-900 hover:bg-gray-100"
+                      >
+                        <Download className="w-4 h-4 mr-2" />
+                        Download Image
+                      </Button>
+                    </div>
                   </div>
                 )}
                 <div className="p-4">

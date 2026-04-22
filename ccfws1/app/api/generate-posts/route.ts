@@ -15,7 +15,7 @@ const IMAGE_STYLES = {
 
 export async function POST(request: NextRequest) {
   try {
-    const { topic, platforms, generateImage, imageStyle } = await request.json();
+    const { topic, platforms, generateImage, imageStyle, postLengthMode, postLength } = await request.json();
 
     if (!topic || !platforms || platforms.length === 0) {
       return NextResponse.json(
@@ -31,20 +31,32 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const platformPrompts: Record<string, string> = {
-      linkedin:
-        "Create a professional, insightful LinkedIn post (150-200 words) about the following topic. Include relevant hashtags and maintain a professional tone suitable for business professionals.",
-      facebook:
-        "Create an engaging Facebook post (100-150 words) about the following topic. Make it conversational and relatable. Include relevant emojis and hashtags.",
-      instagram:
-        "Create a captivating Instagram caption (80-150 characters) about the following topic. Include relevant hashtags (5-10) and emojis. Make it visually descriptive.",
-      tiktok:
-        "Create a trendy TikTok caption (50-100 characters) about the following topic. Use trending language, hashtags, and emojis. Make it catchy and shareable.",
+    const getOptimalLength = (platform: string): number => {
+      const lengths: Record<string, number> = {
+        linkedin: 200,
+        facebook: 150,
+        instagram: 120,
+        tiktok: 80,
+      };
+      return lengths[platform] || 150;
     };
 
     const results: Record<string, { text: string; imageUrl?: string }> = {};
 
     for (const platform of platforms) {
+      const length = postLengthMode === "auto" ? getOptimalLength(platform) : postLength;
+      
+      const platformPrompts: Record<string, string> = {
+        linkedin:
+          `Create a professional, insightful LinkedIn post (approximately ${length} characters) about the following topic. Include relevant hashtags and maintain a professional tone suitable for business professionals.`,
+        facebook:
+          `Create an engaging Facebook post (approximately ${length} characters) about the following topic. Make it conversational and relatable. Include relevant emojis and hashtags.`,
+        instagram:
+          `Create a captivating Instagram caption (approximately ${length} characters) about the following topic. Include relevant hashtags (5-10) and emojis. Make it visually descriptive.`,
+        tiktok:
+          `Create a trendy TikTok caption (approximately ${length} characters) about the following topic. Use trending language, hashtags, and emojis. Make it catchy and shareable.`,
+      };
+
       const prompt = `${platformPrompts[platform]}\n\nTopic: ${topic}`;
 
       const response = await fetch("https://openrouter.ai/api/v1/messages", {
